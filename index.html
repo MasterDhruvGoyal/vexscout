@@ -1,0 +1,1541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VEX Match Jumper - Enhanced (YouTube & Vimeo)</title>
+    <script src="https://player.vimeo.com/api/player.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #0a0e27;
+            color: #e2e8f0;
+        }
+
+        .header {
+            background: #1a1f3a;
+            padding: 12px 24px;
+            border-bottom: 1px solid #2d3748;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: 600;
+            color: #60a5fa;
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            height: calc(100vh - 60px);
+        }
+
+        .video-section {
+            display: flex;
+            flex-direction: column;
+            background: #0f1629;
+            overflow-y: auto;
+        }
+
+        .video-wrapper {
+            position: relative;
+            background: #000;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        #player-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #youtube-player, #vimeo-player {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .empty-player {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #64748b;
+            text-align: center;
+            z-index: 1;
+        }
+
+        .platform-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 6px 12px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #10b981;
+            z-index: 10;
+        }
+
+        .streams-section {
+            background: #1a1f3a;
+            padding: 16px 20px;
+            border-top: 1px solid #2d3748;
+            flex-shrink: 0;
+        }
+
+        .streams-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .streams-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #94a3b8;
+        }
+
+        .division-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .division-tab {
+            padding: 6px 16px;
+            background: #0f1629;
+            border: 1px solid #2d3748;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .division-tab:hover {
+            background: #1e293b;
+            border-color: #475569;
+        }
+
+        .division-tab.active {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: #fff;
+        }
+
+        .stream-input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .stream-input {
+            flex: 1;
+            padding: 10px 12px;
+            background: #0f1629;
+            border: 1px solid #2d3748;
+            border-radius: 6px;
+            color: #e2e8f0;
+            font-size: 13px;
+        }
+
+        .stream-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .stream-delete-btn {
+            padding: 10px 12px;
+            background: #dc2626;
+            border: none;
+            border-radius: 6px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .add-stream-btn {
+            width: 100%;
+            padding: 8px;
+            background: #10b981;
+            border: none;
+            border-radius: 6px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .sidebar {
+            background: #1a1f3a;
+            border-left: 1px solid #2d3748;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .event-finder {
+            padding: 20px;
+            border-bottom: 1px solid #2d3748;
+            flex-shrink: 0;
+        }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748b;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .event-input {
+            width: 100%;
+            padding: 10px 12px;
+            background: #0f1629;
+            border: 1px solid #2d3748;
+            border-radius: 6px;
+            color: #e2e8f0;
+            font-size: 14px;
+        }
+
+        .event-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .sync-mode {
+            padding: 16px 20px;
+            border-bottom: 1px solid #2d3748;
+            flex-shrink: 0;
+        }
+
+        .sync-toggle {
+            display: flex;
+            gap: 4px;
+            background: #0f1629;
+            padding: 4px;
+            border-radius: 6px;
+        }
+
+        .sync-option {
+            flex: 1;
+            padding: 8px;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            color: #94a3b8;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sync-option.active {
+            background: #3b82f6;
+            color: #fff;
+        }
+
+        .manual-sync-controls {
+            padding: 16px 20px;
+            background: rgba(251, 146, 60, 0.1);
+            border-top: 2px solid #f59e0b;
+            display: none;
+            flex-shrink: 0;
+        }
+
+        .manual-sync-controls.show {
+            display: block;
+        }
+
+        .sync-control-label {
+            font-size: 12px;
+            color: #fbbf24;
+            margin-bottom: 8px;
+        }
+
+        .offset-input {
+            width: 100%;
+            padding: 8px 12px;
+            background: #0f1629;
+            border: 1px solid #2d3748;
+            border-radius: 6px;
+            color: #e2e8f0;
+            font-size: 13px;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #2d3748;
+            flex-shrink: 0;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 14px;
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            color: #e2e8f0;
+        }
+
+        .tab.active {
+            color: #60a5fa;
+            border-bottom-color: #60a5fa;
+        }
+
+        .tab-content {
+            flex: 1;
+            overflow-y: auto;
+            display: none;
+            min-height: 0;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .tab-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .tab-content::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.4);
+        }
+
+        .tab-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        .tab-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .video-section::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .video-section::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.4);
+        }
+
+        .video-section::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        .video-section::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .team-search {
+            padding: 16px 20px;
+            flex-shrink: 0;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 12px;
+            background: #0f1629;
+            border: 1px solid #2d3748;
+            border-radius: 6px;
+            color: #e2e8f0;
+            font-size: 14px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .search-btn {
+            margin-top: 8px;
+            width: 100%;
+            padding: 10px;
+            background: #3b82f6;
+            border: none;
+            border-radius: 6px;
+            color: #fff;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .matches-container {
+            padding: 16px 20px;
+        }
+
+        .day-header {
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748b;
+            margin: 12px 0 6px 0;
+            padding: 6px 0;
+            border-bottom: 1px solid #2d3748;
+            text-transform: uppercase;
+        }
+
+        .match-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(45, 55, 72, 0.5);
+        }
+
+        .match-info {
+            flex: 1;
+        }
+
+        .match-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 4px;
+        }
+
+        .match-status {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-left: 8px;
+        }
+
+        .match-status.win { background: #10b981; }
+        .match-status.loss { background: #ef4444; }
+        .match-status.tie { background: #f59e0b; }
+        .match-status.unplayed { background: #64748b; }
+
+        .match-time {
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .match-teams {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .play-btn {
+            width: 36px;
+            height: 36px;
+            background: #3b82f6;
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .play-btn:hover {
+            background: #2563eb;
+            transform: scale(1.05);
+        }
+
+        .play-btn:disabled {
+            background: #475569;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .sync-btn {
+            width: 32px;
+            height: 32px;
+            background: #f59e0b;
+            border: none;
+            border-radius: 6px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 11px;
+            margin-right: 8px;
+        }
+
+        .loading-indicator {
+            text-align: center;
+            padding: 20px;
+            color: #64748b;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #2d3748;
+            border-top-color: #60a5fa;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .team-list-item {
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(45, 55, 72, 0.5);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .team-list-item:hover {
+            background: rgba(59, 130, 246, 0.1);
+            padding-left: 8px;
+        }
+
+        .team-number {
+            font-size: 14px;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        .team-name {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 2px;
+        }
+        /* ── Scouting styles ─────────────────────────── */
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+        .stat-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+        .stat-card {
+            background: rgba(15,23,42,0.7);
+            border: 1px solid #2d3748;
+            border-radius: 10px;
+            padding: 12px 10px;
+            text-align: center;
+        }
+        .stat-card .val { font-size: 20px; font-weight: 700; color: #60a5fa; line-height: 1; }
+        .stat-card .lbl { font-size: 10px; color: #64748b; margin-top: 4px; }
+        .stat-card.green  .val { color: #10b981; }
+        .stat-card.yellow .val { color: #fbbf24; }
+        .stat-card.red    .val { color: #ef4444; }
+        .stat-card.purple .val { color: #a78bfa; }
+        .stat-card.cyan   .val { color: #22d3ee; }
+
+        .stat-section { margin-bottom: 18px; }
+        .stat-section-title {
+            font-size: 10px; font-weight: 700; color: #64748b;
+            letter-spacing: 1.5px; text-transform: uppercase;
+            border-bottom: 1px solid #2d3748; padding-bottom: 6px; margin-bottom: 10px;
+        }
+        .stat-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 7px 0; border-bottom: 1px solid rgba(45,55,72,0.4); font-size: 13px;
+        }
+        .stat-row .key { color: #94a3b8; }
+        .stat-row .val { font-weight: 600; color: #e2e8f0; }
+
+        /* Modal */
+        #scout-modal {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.82); z-index: 2000;
+            overflow-y: auto; padding: 20px;
+        }
+        .scout-modal-inner {
+            max-width: 680px; margin: 0 auto;
+            background: #111827;
+            border: 1px solid #2d3748; border-radius: 16px;
+            overflow: hidden;
+        }
+        .scout-modal-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e1b4b 100%);
+            padding: 22px 24px 18px;
+            position: sticky; top: 0; z-index: 10;
+            border-bottom: 1px solid #2d3748;
+        }
+        .scout-modal-body { padding: 20px 24px 30px; }
+
+        /* Bar chart */
+        .mini-bar-row {
+            display: flex; align-items: center; gap: 8px;
+            margin-bottom: 5px; font-size: 11px;
+        }
+        .mini-bar-label { width: 70px; color: #94a3b8; flex-shrink: 0; text-align: right; }
+        .mini-bar-track { flex: 1; background: #1e293b; border-radius: 4px; height: 14px; overflow: hidden; position: relative; }
+        .mini-bar-fill  { height: 100%; border-radius: 4px; }
+        .mini-bar-val   { width: 36px; color: #e2e8f0; font-weight: 600; flex-shrink: 0; }
+
+        /* Match log pill */
+        .match-pill {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 3px 8px; border-radius: 20px;
+            font-size: 11px; font-weight: 600; margin: 3px;
+        }
+        .match-pill.win  { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+        .match-pill.loss { background: rgba(239,68,68,0.15);  color: #ef4444;  border: 1px solid rgba(239,68,68,0.3); }
+        .match-pill.tie  { background: rgba(148,163,184,0.15);color: #94a3b8;  border: 1px solid rgba(148,163,184,0.3); }
+        .match-pill.elim { border-style: dashed; }
+
+        .team-list-item.scouted { background: rgba(16,185,129,0.08); border-left: 3px solid #10b981; padding-left: 8px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">🤖 VEX Match Jumper - Enhanced</div>
+        <div style="font-size: 12px; color: #64748b;">YouTube & Vimeo Support</div>
+    </div>
+
+    <div class="main-container">
+        <!-- Left: Video and Streams -->
+        <div class="video-section">
+            <div class="video-wrapper">
+                <div id="player-container">
+                    <div class="empty-player">
+                        <h3>Add a stream URL below to begin</h3>
+                        <p style="margin-top: 8px; font-size: 14px;">Supports YouTube and Vimeo</p>
+                    </div>
+                </div>
+                <div id="platform-indicator" class="platform-indicator hidden"></div>
+            </div>
+
+            <div class="streams-section">
+                <div class="streams-header">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polygon points="10 8 16 12 10 16 10 8"></polygon>
+                    </svg>
+                    <span class="streams-title">LIVESTREAM URLs</span>
+                    <button id="detect-stream-btn" onclick="app.autoDetectStream()" style="margin-left: auto; padding: 4px 12px; background: #3b82f6; border: none; border-radius: 4px; color: #fff; font-size: 11px; cursor: pointer;">DIVISIONS ON</button>
+                </div>
+
+                <div class="division-tabs" id="division-tabs"></div>
+
+                <div id="streams-container"></div>
+
+                <button class="add-stream-btn" onclick="app.addStreamInput()">+ Add Extra Stream</button>
+            </div>
+        </div>
+
+        <!-- Right: Sidebar -->
+        <div class="sidebar">
+            <div class="event-finder">
+                <div class="section-label">🔍 FIND EVENT</div>
+                <input 
+                    type="text" 
+                    class="event-input" 
+                    id="event-input"
+                    placeholder="Enter SKU (e.g., RE-VRC-23-5434)"
+                />
+            </div>
+
+            <div class="sync-mode">
+                <div class="section-label">SYNC MODE</div>
+                <div class="sync-toggle">
+                    <button class="sync-option active" data-mode="auto">AUTO</button>
+                    <button class="sync-option" data-mode="manual">MANUAL</button>
+                </div>
+            </div>
+
+            <div id="manual-sync-panel" class="manual-sync-controls">
+                <div class="sync-control-label">⚙️ CROSS-MANUAL SYNC</div>
+                <p style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">
+                    <strong>Sync multiple matches</strong> to handle lunch breaks and delays:<br>
+                    1. Play a match in the video<br>
+                    2. Click its "⚙️" button when it starts<br>
+                    3. Repeat for matches after breaks<br>
+                    4. Closest sync point will be used automatically
+                </p>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="font-size: 12px; color: #e2e8f0;">
+                        Sync points: <span id="offset-display" style="color: #10b981; font-weight: 600;">0 synced</span>
+                    </div>
+                    <button onclick="app.clearSyncPoints()" style="padding: 4px 12px; background: #dc2626; border: none; border-radius: 4px; color: #fff; cursor: pointer; font-size: 11px;">Clear All</button>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <button class="tab" data-tab="find-team">Find Team</button>
+                <button class="tab" data-tab="team-list">Team List</button>
+                <button class="tab active" data-tab="matches">Matches</button>
+                <button class="tab" data-tab="scout">🔭 Scout</button>
+            </div>
+
+            <div id="find-team-tab" class="tab-content">
+                <div class="team-search">
+                    <div class="section-label">FIND TEAM</div>
+                    <input type="text" class="search-input" placeholder="Team number" id="team-search-input"
+                        onkeydown="if(event.key==='Enter') app.searchTeam()" />
+                    <button class="search-btn" onclick="app.searchTeam()">Search</button>
+                </div>
+            </div>
+
+            <div id="team-list-tab" class="tab-content">
+                <div class="matches-container" id="team-list-container">
+                    <p class="loading-indicator">Load an event to see teams</p>
+                </div>
+            </div>
+
+            <div id="matches-tab" class="tab-content active">
+                <div class="matches-container" id="matches-container">
+                    <p class="loading-indicator">Load an event to see matches</p>
+                </div>
+            </div>
+
+            <div id="scout-tab" class="tab-content">
+                <div class="matches-container" id="scout-container">
+                    <p class="loading-indicator" style="text-align:center;padding:30px 20px;">
+                        <span style="font-size:32px;">🔭</span><br><br>
+                        Click a team in Team List<br>then press <strong>Scout</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scout Stats Modal -->
+    <div id="scout-modal">
+        <div class="scout-modal-inner">
+            <div id="scout-modal-content"></div>
+        </div>
+    </div>
+
+
+    <script>
+        const API_TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIzIiwianRpIjoiOGEyMjAzY2Q5YWU4ZGY2NmY4ODNlZjIwNjMzMWY2YmI3NzY5NGI0ZTYyZmQ5MWZkOTQ4MTZhZTViNTE4ZDhjZmRmZDRiZTUxNjBkZTE5NjYiLCJpYXQiOjE3NzEzMDAxMDcuNTQ0NzA5OSwibmJmIjoxNzcxMzAwMTA3LjU0NDcxMywiZXhwIjoyNzE3OTg0OTA3LjUzNjI2ODIsInN1YiI6IjExMjA4MiIsInNjb3BlcyI6W119.F5xqUcL272kVYsjsqG3gtSQ-hikNGyfDJdaDJVRW_R91b-KLx4B6Us996FkLHwJlqCP7cj0nG0w7AuHbEvrn2VvlqsYfuAyVjRPUEgyKMJ7sYWLXRTqWxft9eqSVP5KY9vLiuwGAJNfDDuAzFuIGprBjIze45-bdpQFjz3_vOZT71uWFMstAZ6-qWmuKEDdkmno8hQ5SGzDZNB-JwFVhcZ58FEKXacC7vJ41Z8Ho-rgKEMKKQx52Se034coEj62Tf2oEwufh63zRwIIkLal9T9xg1GRB05YHdInV1Aw1W5rEHQm51v7k1UrZhNfIBwxcWsbvqNYYzfowFBkBoJVkls-9aYUr2B72mL3JhKoef-tWD7fcjSCFWmirP7qhSf-dloIr329SkTVQWIZuF9MQjl6r6CJZAxns7yxW1QDDAXlGMRV5cLJHGJipW_ZgcM_1aFJd8MrSZ7TDeqzg_XWLEqPHCO0fDHk8LLnVR1t3_TxU1YJ-_isInWrZSppcAvzvVS1o7ZLM8KfsxLq5WsTQA1jWz58yggzkpW4AZrsj2ZLbckg6uj49LzW-sferjoth3ahLO13BSXWKUBOELMTw0YdJZYpLZaTiGmZ0UK0kocyCS9GZve-3xc7m5OkCtKyfc6hpJwuPjrTb4dDyZ2Jty4Hlt93dtwrTQORYBxQiv4w';
+
+        const ROUND_NAMES = {
+            1: 'Practice', 2: 'Qualifier', 3: 'Quarter-Final',
+            4: 'Semi-Final', 5: 'Final', 6: 'Round of 16',
+            7: 'Round of 32', 16: 'Top 16'
+        };
+
+        const app = {
+            state: {
+                eventId: null, eventData: null, divisions: [], currentDivision: null,
+                dayStreams: {},
+                player: null, platform: null,
+                activeStreamDivision: null, activeStreamDateKey: null,
+                matches: [], teams: [],
+                syncMode: 'auto',
+                referencePoints: {},
+                filterTeam: null,
+            },
+
+            // ─── helpers ────────────────────────────────────────────────────────────
+            async apiCall(endpoint) {
+                const r = await fetch(`https://www.robotevents.com/api/v2${endpoint}`, {
+                    headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${API_TOKEN}` }
+                });
+                if (!r.ok) throw new Error(`API error ${r.status}`);
+                return r.json();
+            },
+            dateKey(iso)        { return iso ? iso.split('T')[0] : null; },
+            refKey(divId, dk)   { return `${divId}__${dk}`; },
+            getRefs(divId, dk)  { return this.state.referencePoints[this.refKey(divId, dk)] || []; },
+            setRefs(divId, dk, refs) { this.state.referencePoints[this.refKey(divId, dk)] = refs; },
+            totalSyncPoints()   { return Object.values(this.state.referencePoints).reduce((s, a) => s + a.length, 0); },
+
+            // ─── init ───────────────────────────────────────────────────────────────
+            init() {
+                document.getElementById('event-input').addEventListener('change', e => this.loadEvent(e.target.value.trim()));
+                document.querySelectorAll('.sync-option').forEach(btn => btn.addEventListener('click', e => this.setSyncMode(e.target.dataset.mode)));
+                document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', e => this.switchTab(e.target.dataset.tab)));
+            },
+
+            // ─── load event ─────────────────────────────────────────────────────────
+            async loadEvent(sku) {
+                if (!sku) return;
+                document.getElementById('matches-container').innerHTML = '<p class="loading-indicator"><span class="spinner"></span> Loading event…</p>';
+                try {
+                    const ev = await this.apiCall(`/events?sku[]=${sku}`);
+                    if (!ev.data?.length) throw new Error('Event not found. Check the SKU.');
+                    this.state.eventData = ev.data[0];
+                    this.state.eventId   = ev.data[0].id;
+                    this.state.divisions = ev.data[0].divisions || [];
+                    this.state.dayStreams = {};
+                    this.state.referencePoints = {};
+                    this.state.matches = [];
+                    this.state.teams   = [];
+                    this.state.filterTeam = null;
+                    if (this.state.divisions.length > 0) {
+                        this.state.divisions.forEach(d => { this.state.dayStreams[d.id] = []; });
+                        this.state.currentDivision = this.state.divisions[0].id;
+                    }
+                    this.renderDivisionTabs();
+                    this.renderStreamInputs();
+                    await Promise.all([this.loadMatches(), this.loadTeams()]);
+                } catch (err) {
+                    document.getElementById('matches-container').innerHTML = `<p class="loading-indicator" style="color:#ef4444;">Error: ${err.message}</p>`;
+                }
+            },
+
+            // ─── load matches ────────────────────────────────────────────────────────
+            async loadMatches() {
+                if (!this.state.eventId || this.state.currentDivision == null) return;
+                const container = document.getElementById('matches-container');
+                try {
+                    let all = [], page = 1, more = true;
+                    while (more) {
+                        container.innerHTML = `<p class="loading-indicator"><span class="spinner"></span> Loading… (${all.length} so far)</p>`;
+                        const res = await this.apiCall(`/events/${this.state.eventId}/divisions/${this.state.currentDivision}/matches?per_page=250&page=${page}`);
+                        if (res.data?.length) { all = all.concat(res.data); more = res.meta && res.meta.current_page < res.meta.last_page; page++; }
+                        else more = false;
+                    }
+                    all.sort((a, b) => {
+                        const at = a.scheduled ? new Date(a.scheduled).getTime() : Infinity;
+                        const bt = b.scheduled ? new Date(b.scheduled).getTime() : Infinity;
+                        if (at !== bt) return at - bt;
+                        if (a.round !== b.round) return a.round - b.round;
+                        if (a.instance !== b.instance) return a.instance - b.instance;
+                        return a.matchnum - b.matchnum;
+                    });
+                    this.state.matches = all;
+                    this.state.filterTeam = null;
+                    this.autoPopulateDaySlots();
+                    this.renderStreamInputs();
+                    this.renderMatches();
+                } catch (err) {
+                    container.innerHTML = `<p class="loading-indicator" style="color:#ef4444;">Error: ${err.message}</p>`;
+                }
+            },
+
+            autoPopulateDaySlots() {
+                const div = this.state.currentDivision;
+                const existing = this.state.dayStreams[div] || [];
+                const dates = [...new Set(this.state.matches.filter(m => m.scheduled).map(m => this.dateKey(m.scheduled)))].sort();
+                if (!dates.length) return;
+                this.state.dayStreams[div] = dates.map((dk, i) => {
+                    const kept = existing.find(s => s.dateKey === dk);
+                    if (kept) return kept;
+                    const d = new Date(dk + 'T12:00:00');
+                    return { url: '', dateKey: dk, label: `Day ${i+1} · ${d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' })}` };
+                });
+            },
+
+            // ─── load teams ──────────────────────────────────────────────────────────
+            async loadTeams() {
+                if (!this.state.eventId) return;
+                try {
+                    let all = [], page = 1, more = true;
+                    while (more) {
+                        const res = await this.apiCall(`/events/${this.state.eventId}/teams?per_page=250&page=${page}`);
+                        if (res.data?.length) { all = all.concat(res.data); more = res.meta && res.meta.current_page < res.meta.last_page; page++; }
+                        else more = false;
+                    }
+                    this.state.teams = all;
+                    this.renderTeamList();
+                } catch (err) { console.error('Teams:', err); }
+            },
+
+            // ─── division tabs ───────────────────────────────────────────────────────
+            renderDivisionTabs() {
+                document.getElementById('division-tabs').innerHTML = this.state.divisions.map(d => `
+                    <button class="division-tab ${d.id === this.state.currentDivision ? 'active' : ''}" onclick="app.selectDivision(${d.id})">${d.name}</button>`).join('');
+            },
+
+            selectDivision(divId) {
+                this.state.currentDivision = divId;
+                this.state.matches = [];
+                this.state.filterTeam = null;
+                if (!this.state.dayStreams[divId]) this.state.dayStreams[divId] = [];
+                this.renderDivisionTabs();
+                const el = document.getElementById('offset-display');
+                if (el) el.textContent = `${this.totalSyncPoints()} synced`;
+                this.loadMatches();
+            },
+
+            // ─── stream inputs ───────────────────────────────────────────────────────
+            renderStreamInputs() {
+                const div = this.state.currentDivision;
+                const slots = (div != null && this.state.dayStreams[div]) ? this.state.dayStreams[div] : [];
+                const c = document.getElementById('streams-container');
+                if (!slots.length) {
+                    c.innerHTML = `<div class="stream-input-group"><input type="text" class="stream-input" placeholder="Paste YouTube or Vimeo URL" onchange="app.addFirstStream(this.value)" /></div>`;
+                    return;
+                }
+                c.innerHTML = slots.map((s, i) => {
+                    const isActive = this.state.activeStreamDivision === div && this.state.activeStreamDateKey === s.dateKey;
+                    const hp = this.detectPlatform(s.url);
+                    const badge = hp ? `<span style="color:${hp==='youtube'?'#ef4444':'#60a5fa'};font-size:10px;margin-left:4px;">${hp.toUpperCase()}</span>` : '';
+                    return `<div style="margin-bottom:8px;">
+                        <div style="font-size:11px;color:#64748b;margin-bottom:4px;display:flex;align-items:center;gap:6px;">
+                            ${isActive ? '<span style="color:#10b981;font-weight:600;">▶ ACTIVE</span>' : ''}
+                            <span>${s.label}</span>${badge}
+                        </div>
+                        <div class="stream-input-group">
+                            <input type="text" class="stream-input" value="${s.url}" placeholder="YouTube or Vimeo URL" onchange="app.updateDayStream(${i}, this.value)" />
+                            <button class="stream-delete-btn" onclick="app.deleteDayStream(${i})">✕</button>
+                        </div>
+                    </div>`;
+                }).join('');
+            },
+
+            updateDayStream(idx, url) {
+                const div = this.state.currentDivision;
+                if (div == null) return;
+                this.state.dayStreams[div][idx].url = url;
+                const p = this.detectPlatform(url);
+                if (p) { document.getElementById('platform-indicator').textContent = p.toUpperCase(); document.getElementById('platform-indicator').classList.remove('hidden'); this.switchToStream(div, this.state.dayStreams[div][idx].dateKey, url); }
+                this.renderStreamInputs();
+            },
+
+            addFirstStream(url) {
+                const div = this.state.currentDivision; if (div == null) return;
+                if (!this.state.dayStreams[div]) this.state.dayStreams[div] = [];
+                this.state.dayStreams[div].push({ url, dateKey: 'manual_1', label: 'Stream 1' });
+                this.switchToStream(div, 'manual_1', url); this.renderStreamInputs();
+            },
+
+            addStreamInput() {
+                const div = this.state.currentDivision; if (div == null) return;
+                if (!this.state.dayStreams[div]) this.state.dayStreams[div] = [];
+                const n = this.state.dayStreams[div].length + 1;
+                this.state.dayStreams[div].push({ url: '', dateKey: `manual_${n}`, label: `Extra Stream ${n}` });
+                this.renderStreamInputs();
+            },
+
+            deleteDayStream(idx) {
+                const div = this.state.currentDivision; if (div == null) return;
+                this.state.dayStreams[div].splice(idx, 1); this.renderStreamInputs();
+            },
+
+            // ─── platform detection ──────────────────────────────────────────────────
+            detectPlatform(url) {
+                if (!url) return null; url = url.trim();
+                if (/youtube\.com|youtu\.be/.test(url)) return 'youtube';
+                if (/vimeo\.com/.test(url)) return 'vimeo';
+                return null;
+            },
+
+            extractVideoId(url, platform) {
+                url = url.trim();
+                if (platform === 'youtube') { const m = url.match(/(?:v=|youtu\.be\/|\/embed\/|\/live\/|\/shorts\/)([A-Za-z0-9_-]{11})/); return m ? m[1] : null; }
+                if (platform === 'vimeo')   { const m = url.match(/vimeo\.com\/(?:video\/|event\/\d+\/|manage\/videos\/)?(\d+)/); return m ? m[1] : null; }
+                return null;
+            },
+
+            // ─── player ──────────────────────────────────────────────────────────────
+            switchToStream(divId, dateKey, url) {
+                const platform = this.detectPlatform(url); if (!platform) return;
+                const videoId  = this.extractVideoId(url, platform); if (!videoId) return;
+                this.state.platform = platform;
+                this.state.activeStreamDivision = divId;
+                this.state.activeStreamDateKey  = dateKey;
+                document.getElementById('platform-indicator').textContent = platform.toUpperCase();
+                document.getElementById('platform-indicator').classList.remove('hidden');
+                const container = document.getElementById('player-container');
+                if (platform === 'youtube') this.initYouTubePlayer(videoId, container);
+                else this.initVimeoPlayer(videoId, container);
+            },
+
+            initYouTubePlayer(videoId, container) {
+                if (!window.YT) { const tag = document.createElement('script'); tag.src = 'https://www.youtube.com/iframe_api'; document.head.appendChild(tag); window.onYouTubeIframeAPIReady = () => this.createYouTubePlayer(videoId, container); }
+                else this.createYouTubePlayer(videoId, container);
+            },
+
+            createYouTubePlayer(videoId, container) {
+                try { if (this.state.player?.destroy) this.state.player.destroy(); } catch(e) {}
+                container.innerHTML = '<div id="youtube-player"></div>';
+                this.state.player = new YT.Player('youtube-player', { height:'100%', width:'100%', videoId, playerVars:{ autoplay:0, controls:1, rel:0 } });
+            },
+
+            initVimeoPlayer(videoId, container) {
+                container.innerHTML = `<iframe id="vimeo-player" src="https://player.vimeo.com/video/${videoId}?title=0&byline=0&portrait=0" width="100%" height="100%" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
+                this.state.player = new Vimeo.Player('vimeo-player');
+            },
+
+            // ─── jump to match ────────────────────────────────────────────────────────
+            async jumpToMatch(matchId) {
+                const match = this.state.matches.find(m => m.id == matchId); if (!match) return;
+                const div = this.state.currentDivision;
+                const slots = this.state.dayStreams[div] || [];
+                let targetDateKey = null, targetSlot = null;
+                if (match.scheduled) { targetDateKey = this.dateKey(match.scheduled); targetSlot = slots.find(s => s.dateKey === targetDateKey); }
+                if (!targetSlot && slots.length > 0) { targetSlot = slots[slots.length - 1]; targetDateKey = targetSlot.dateKey; }
+                if (!targetSlot?.url) { alert(`No stream URL set for ${targetSlot?.label || targetDateKey}. Add it in the Livestream URLs panel.`); return; }
+                if (this.state.activeStreamDivision !== div || this.state.activeStreamDateKey !== targetDateKey) {
+                    this.switchToStream(div, targetDateKey, targetSlot.url);
+                    this.renderStreamInputs();
+                    await new Promise(r => setTimeout(r, 900));
+                }
+                if (!this.state.player) { alert('Please add a stream URL first.'); return; }
+                const seekTime = this.calculateSeekTime(match, div, targetDateKey);
+                if (seekTime === null) { alert('Cannot calculate seek time. Add a sync point in Manual mode first.'); return; }
+                try {
+                    if (this.state.platform === 'youtube') { this.state.player.seekTo(Math.max(0, seekTime), true); this.state.player.playVideo(); }
+                    else { await this.state.player.setCurrentTime(Math.max(0, seekTime)); await this.state.player.play(); }
+                } catch (err) { alert('Seek failed. Wait for video to fully load, then try again.'); }
+            },
+
+            calculateSeekTime(match, divId, dateKey) {
+                const refs = this.getRefs(divId, dateKey);
+                const matchMs = match.scheduled ? new Date(match.scheduled).getTime() : null;
+                if (refs.length > 0 && matchMs !== null) {
+                    let best = null, bestDiff = Infinity;
+                    for (const ref of refs) {
+                        const diff = matchMs - new Date(ref.match.scheduled).getTime();
+                        if (diff >= 0 && diff < bestDiff) { best = ref; bestDiff = diff; }
+                    }
+                    if (!best) best = refs.reduce((a, b) => Math.abs(new Date(a.match.scheduled)-matchMs) < Math.abs(new Date(b.match.scheduled)-matchMs) ? a : b);
+                    return best.videoTime + (matchMs - new Date(best.match.scheduled).getTime()) / 1000;
+                }
+                if (matchMs === null) return null;
+                const dayMs = this.state.matches.filter(m => m.scheduled && this.dateKey(m.scheduled) === dateKey).map(m => new Date(m.scheduled).getTime());
+                if (!dayMs.length) return null;
+                return Math.max(0, (matchMs - Math.min(...dayMs)) / 1000);
+            },
+
+            // ─── sync ─────────────────────────────────────────────────────────────────
+            async syncToMatch(matchId) {
+                if (!this.state.player) { alert('No video loaded.'); return; }
+                const match = this.state.matches.find(m => m.id == matchId);
+                if (!match?.scheduled) { alert('This match has no scheduled time.'); return; }
+                try {
+                    const currentTime = this.state.platform === 'youtube' ? this.state.player.getCurrentTime() : await this.state.player.getCurrentTime();
+                    const div = this.state.currentDivision;
+                    const dk  = this.state.activeStreamDateKey || this.dateKey(match.scheduled);
+                    let refs = this.getRefs(div, dk);
+                    const ei = refs.findIndex(r => r.match.id === match.id);
+                    if (ei >= 0) refs[ei] = { match, videoTime: currentTime };
+                    else refs.push({ match, videoTime: currentTime });
+                    refs.sort((a, b) => new Date(a.match.scheduled) - new Date(b.match.scheduled));
+                    this.setRefs(div, dk, refs);
+                    const total = this.totalSyncPoints();
+                    const el = document.getElementById('offset-display'); if (el) el.textContent = `${total} synced`;
+                    this.renderMatches();
+                    alert(`✓ Synced ${match.name} at ${currentTime.toFixed(1)}s — Total: ${total} sync points`);
+                } catch (err) { alert('Sync failed. Make sure the video is playing.'); }
+            },
+
+            clearSyncPoints() {
+                this.state.referencePoints = {};
+                const el = document.getElementById('offset-display'); if (el) el.textContent = '0 synced';
+                this.renderMatches();
+            },
+
+            setSyncMode(mode) {
+                this.state.syncMode = mode;
+                document.querySelectorAll('.sync-option').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+                document.getElementById('manual-sync-panel').classList.toggle('show', mode === 'manual');
+                this.renderMatches();
+            },
+
+            // ─── render matches ───────────────────────────────────────────────────────
+            renderMatches() {
+                const container = document.getElementById('matches-container');
+                let matches = this.state.filterTeam
+                    ? this.state.matches.filter(m => m.alliances?.some(a => a.teams.some(t => t.team.name === this.state.filterTeam)))
+                    : this.state.matches;
+                if (!matches.length) { container.innerHTML = '<p class="loading-indicator">No matches found</p>'; return; }
+
+                const allRefs = Object.values(this.state.referencePoints).flat();
+                let html = `<div style="font-size:11px;color:#64748b;padding:7px 10px;background:rgba(59,130,246,0.1);border-radius:6px;margin-bottom:10px;">
+                    📊 ${matches.length} matches · ${allRefs.length} sync point${allRefs.length!==1?'s':''}</div>`;
+
+                if (this.state.filterTeam) {
+                    html += `<div style="background:#3b82f6;padding:10px;border-radius:6px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:6px;">
+                        <span style="font-size:13px;">Team <strong>${this.state.filterTeam}</strong></span>
+                        <div style="display:flex;gap:6px;">
+                            <button onclick="app.openScoutModal('${this.state.filterTeam}')" style="padding:3px 10px;background:#7c3aed;border:none;border-radius:4px;color:#fff;cursor:pointer;font-size:12px;">🔭 Scout</button>
+                            <button onclick="app.clearTeamFilter()" style="padding:3px 10px;background:rgba(255,255,255,0.25);border:none;border-radius:4px;color:#fff;cursor:pointer;font-size:12px;">✕</button>
+                        </div></div>`;
+                }
+
+                const scheduled   = matches.filter(m => m.scheduled);
+                const unscheduled = matches.filter(m => !m.scheduled);
+                const byDay = {};
+                scheduled.forEach(m => {
+                    const dk = this.dateKey(m.scheduled);
+                    const label = new Date(dk + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }).toUpperCase();
+                    if (!byDay[dk]) byDay[dk] = { label, matches: [] };
+                    byDay[dk].matches.push(m);
+                });
+                Object.entries(byDay).forEach(([dk, { label, matches: ms }]) => {
+                    const slot = (this.state.dayStreams[this.state.currentDivision]||[]).find(s => s.dateKey === dk);
+                    html += `<div class="day-header">${slot?.url ? '🟢' : '🔴'} ${label}</div>`;
+                    html += ms.map(m => this.renderMatchItem(m, allRefs)).join('');
+                });
+                if (unscheduled.length) {
+                    const byRound = {};
+                    unscheduled.forEach(m => { const k = ROUND_NAMES[m.round]||`Round ${m.round}`; if (!byRound[k]) byRound[k]=[]; byRound[k].push(m); });
+                    Object.entries(byRound).forEach(([rnd, ms]) => {
+                        html += `<div class="day-header" style="color:#f59e0b;border-color:#78350f;">⚡ ${rnd.toUpperCase()}</div>`;
+                        html += ms.map(m => this.renderMatchItem(m, allRefs)).join('');
+                    });
+                }
+                container.innerHTML = html;
+            },
+
+            renderMatchItem(match, allRefs) {
+                const time = match.scheduled ? new Date(match.scheduled).toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' }) : 'TBD';
+                const isSynced = allRefs.some(r => r.match.id === match.id);
+                let badge = '<span style="color:#64748b;">·</span>';
+                if (match.scored && match.alliances?.length === 2) {
+                    const [rs, bs] = [match.alliances[0].score, match.alliances[1].score];
+                    badge = rs > bs ? '<span style="color:#ef4444;">● W</span>' : bs > rs ? '<span style="color:#60a5fa;">● L</span>' : '<span style="color:#94a3b8;">● T</span>';
+                }
+                const hl = n => this.state.filterTeam === n ? `<strong style="background:#fbbf24;color:#000;padding:1px 4px;border-radius:3px;">${n}</strong>` : n;
+                const red  = match.alliances?.[0]?.teams.map(t => hl(t.team.name)).join(', ') || '—';
+                const blue = match.alliances?.[1]?.teams.map(t => hl(t.team.name)).join(', ') || '—';
+                const roundTag = match.round !== 2 ? `<span style="font-size:10px;color:#f59e0b;margin-left:5px;background:rgba(245,158,11,0.15);padding:1px 5px;border-radius:3px;">${ROUND_NAMES[match.round]||'R'+match.round}</span>` : '';
+                return `<div class="match-item" style="${isSynced?'background:rgba(16,185,129,0.08);border-left:3px solid #10b981;padding-left:6px;':''}">
+                    <div class="match-info">
+                        <div class="match-name">${match.name}${roundTag} ${badge}${isSynced?'<span style="color:#10b981;font-size:10px;margin-left:4px;">✓</span>':''}</div>
+                        <div class="match-time">${time}${match.field?' · '+match.field:''}</div>
+                        <div class="match-teams"><span style="color:#ef4444;">Red:</span> ${red}<br><span style="color:#60a5fa;">Blue:</span> ${blue}</div>
+                    </div>
+                    ${this.state.syncMode==='manual'?`<button class="sync-btn" onclick="app.syncToMatch(${match.id})" title="Set sync point">⚙️</button>`:''}
+                    <button class="play-btn" onclick="app.jumpToMatch(${match.id})">▶</button>
+                </div>`;
+            },
+
+            // ─── team list ────────────────────────────────────────────────────────────
+            renderTeamList() {
+                const c = document.getElementById('team-list-container');
+                if (!this.state.teams.length) { c.innerHTML = '<p class="loading-indicator">No teams found</p>'; return; }
+                c.innerHTML = `<p style="font-size:12px;color:#64748b;margin-bottom:10px;padding:7px;background:rgba(59,130,246,0.1);border-radius:6px;">
+                    💡 Click team to filter · 🔭 to scout</p>` +
+                    this.state.teams.map(t => `
+                    <div class="team-list-item ${this.state.filterTeam===t.number?'scouted':''}">
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <div onclick="app.filterByTeam('${t.number}')" style="flex:1;cursor:pointer;">
+                                <div class="team-number">${t.number}</div>
+                                <div class="team-name">${t.team_name||''}</div>
+                            </div>
+                            <button onclick="app.openScoutModal('${t.number}')" style="padding:5px 10px;background:#7c3aed;border:none;border-radius:6px;color:#fff;font-size:12px;cursor:pointer;flex-shrink:0;margin-left:8px;">🔭 Scout</button>
+                        </div>
+                    </div>`).join('');
+            },
+
+            filterByTeam(num) { this.state.filterTeam = num; this.switchTab('matches'); this.renderMatches(); },
+            clearTeamFilter()  { this.state.filterTeam = null; this.renderMatches(); },
+            searchTeam()       { const n = document.getElementById('team-search-input').value.trim(); if (n) this.filterByTeam(n); },
+
+            // ─── tabs ─────────────────────────────────────────────────────────────────
+            switchTab(tab) {
+                document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === `${tab}-tab`));
+            },
+
+            autoDetectStream() { alert('Stream auto-detection coming soon.'); },
+
+            // ─── SCOUTING ──────────────────────────────────────────────────────────────
+
+            openScoutModal(teamNumber) {
+                const modal   = document.getElementById('scout-modal');
+                const content = document.getElementById('scout-modal-content');
+                modal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+                content.innerHTML = `<div style="padding:60px;text-align:center;">
+                    <div class="spinner" style="width:36px;height:36px;border-width:3px;margin:0 auto;"></div>
+                    <div style="margin-top:16px;color:#64748b;font-size:14px;">Loading stats for <strong style="color:#60a5fa;">${teamNumber}</strong>…</div></div>`;
+                modal.onclick = e => { if (e.target === modal) this.closeScoutModal(); };
+                const team = this.state.teams.find(t => t.number === teamNumber);
+                if (!team) { content.innerHTML = '<p style="color:#ef4444;padding:20px;">Team not found in loaded event.</p>'; return; }
+                this.buildScoutModal(teamNumber, team, content);
+            },
+
+            closeScoutModal() {
+                document.getElementById('scout-modal').style.display = 'none';
+                document.body.style.overflow = '';
+            },
+
+            async buildScoutModal(teamNumber, team, content) {
+                try {
+                    // Fetch rankings from all divisions
+                    const allRankings = (await Promise.all(
+                        this.state.divisions.map(d =>
+                            this.apiCall(`/events/${this.state.eventId}/divisions/${d.id}/rankings?per_page=250`)
+                                .then(r => r.data || []).catch(() => [])
+                        )
+                    )).flat();
+                    const ranking = allRankings.find(r => r.team.name === teamNumber);
+
+                    // Skills scores
+                    const skillsRes = await this.apiCall(`/events/${this.state.eventId}/skills?team[]=${team.id}`).catch(() => ({data:[]}));
+                    const skills    = skillsRes.data || [];
+                    const drvSkill  = skills.find(s => s.type === 'driver');
+                    const progSkill = skills.find(s => s.type === 'programming');
+
+                    // All matches for this team
+                    const teamMatches = await this.getTeamMatches(teamNumber);
+
+                    const stats = this.computeTeamStats(teamNumber, teamMatches, ranking, allRankings);
+                    content.innerHTML = this.renderScoutPanel(team, ranking, stats, drvSkill, progSkill, teamMatches, allRankings);
+                } catch (err) {
+                    content.innerHTML = `<div style="padding:24px;text-align:center;color:#ef4444;">
+                        <div style="font-size:24px;margin-bottom:8px;">⚠️</div>Error: ${err.message}</div>`;
+                }
+            },
+
+            async getTeamMatches(teamNumber) {
+                // Use already-loaded matches if they have this team
+                const inCurrent = this.state.matches.filter(m =>
+                    m.alliances?.some(a => a.teams.some(t => t.team.name === teamNumber))
+                );
+                if (inCurrent.length > 0) return inCurrent;
+                // Otherwise fetch from all divisions
+                let all = [];
+                for (const div of this.state.divisions) {
+                    try {
+                        const res = await this.apiCall(`/events/${this.state.eventId}/divisions/${div.id}/matches?per_page=250`);
+                        all = all.concat(res.data || []);
+                    } catch(e) {}
+                }
+                return all.filter(m => m.alliances?.some(a => a.teams.some(t => t.team.name === teamNumber)));
+            },
+
+            // ─── stats computation ────────────────────────────────────────────────────
+            computeTeamStats(teamNumber, matches, ranking, allRankings) {
+                const scored = matches.filter(m => m.scored && m.alliances?.length === 2);
+                const quals  = scored.filter(m => m.round === 2);
+                const elims  = scored.filter(m => m.round > 2);
+
+                let wins=0, losses=0, ties=0, totalScore=0, totalOpp=0, highScore=0, lowScore=Infinity;
+                const scoreHistory = [];
+                const byColor = { red:[], blue:[] };
+
+                quals.forEach(m => {
+                    const myA  = m.alliances.find(a => a.teams.some(t => t.team.name === teamNumber));
+                    const oppA = m.alliances.find(a => !a.teams.some(t => t.team.name === teamNumber));
+                    if (!myA || !oppA) return;
+                    const my = myA.score, opp = oppA.score;
+                    totalScore += my; totalOpp += opp;
+                    if (my > highScore) highScore = my;
+                    if (my < lowScore)  lowScore  = my;
+                    scoreHistory.push({ match: m.name, score: my, opp, won: my > opp });
+                    if (myA.color) byColor[myA.color]?.push(my);
+                    if (my > opp) wins++; else if (opp > my) losses++; else ties++;
+                });
+
+                const n = quals.length;
+                const avgScore  = n ? totalScore/n : 0;
+                const avgOpp    = n ? totalOpp/n   : 0;
+                const variance  = n > 1 ? quals.reduce((s, m, i) => {
+                    const myA = m.alliances?.find(a => a.teams.some(t => t.team.name === teamNumber));
+                    return s + (myA ? Math.pow(myA.score - avgScore, 2) : 0);
+                }, 0) / n : 0;
+                const stdDev    = Math.sqrt(variance).toFixed(1);
+                if (lowScore === Infinity) lowScore = 0;
+
+                const avgArr = arr => arr.length ? (arr.reduce((a,b)=>a+b,0)/arr.length).toFixed(1) : '—';
+                const winMargins  = scoreHistory.filter(h=>h.won).map(h=>h.score-h.opp);
+                const lossMargins = scoreHistory.filter(h=>!h.won&&h.score!==h.opp).map(h=>h.opp-h.score);
+
+                // Elims
+                let elimWins=0, elimLosses=0, maxElimRound=0;
+                elims.forEach(m => {
+                    const myA  = m.alliances.find(a=>a.teams.some(t=>t.team.name===teamNumber));
+                    const oppA = m.alliances.find(a=>!a.teams.some(t=>t.team.name===teamNumber));
+                    if (!myA||!oppA) return;
+                    if (myA.score > oppA.score) elimWins++; else elimLosses++;
+                    if (m.round > maxElimRound) maxElimRound = m.round;
+                });
+
+                const wonFinals = elims.some(m => m.round === 5 &&
+                    (m.alliances.find(a=>a.teams.some(t=>t.team.name===teamNumber))?.score??0) >
+                    (m.alliances.find(a=>!a.teams.some(t=>t.team.name===teamNumber))?.score??0));
+                const reachMap = {0:'Did Not Qualify',2:'Quals Only',3:'Quarter-Finals',4:'Semi-Finals',5:'Finalist',6:'Top 16',7:'Top 32'};
+                const reach    = wonFinals ? '🏆 Tournament Champion' : (reachMap[maxElimRound||(n?2:0)] || `Round ${maxElimRound}`);
+
+                const totalTeams  = allRankings.length;
+                const rank        = ranking?.rank ?? null;
+                const percentile  = (rank && totalTeams) ? Math.round((1-rank/totalTeams)*100) : null;
+
+                return {
+                    wins, losses, ties, matchCount: n,
+                    avgScore: avgScore.toFixed(1), avgOpp: avgOpp.toFixed(1),
+                    winRate:  n ? (wins/n*100).toFixed(0) : '—',
+                    highScore, lowScore, stdDev,
+                    avgWinMargin:  winMargins.length  ? (winMargins.reduce((a,b)=>a+b,0)/winMargins.length).toFixed(1)   : '—',
+                    avgLossMargin: lossMargins.length ? (lossMargins.reduce((a,b)=>a+b,0)/lossMargins.length).toFixed(1) : '—',
+                    redAvg: avgArr(byColor.red),   redGames: byColor.red.length,
+                    blueAvg:avgArr(byColor.blue), blueGames: byColor.blue.length,
+                    reach, elimWins, elimLosses, maxElimRound,
+                    wp: ranking?.wp ?? '—', ap: ranking?.ap ?? '—', sp: ranking?.sp ?? '—',
+                    rank: rank ?? '—', totalTeams, percentile,
+                    scoreHistory,
+                };
+            },
+
+            // ─── render scout panel ───────────────────────────────────────────────────
+            renderScoutPanel(team, ranking, stats, drvSkill, progSkill, matches, allRankings) {
+                const n           = stats.matchCount;
+                const winPct      = n ? parseFloat(stats.winRate) : 0;
+                const wrColor     = winPct>=70?'#10b981':winPct>=50?'#fbbf24':'#ef4444';
+                const rankColor   = stats.percentile>=75?'#10b981':stats.percentile>=40?'#fbbf24':'#ef4444';
+                const drvScore    = drvSkill?.score  ?? null;
+                const progScore   = progSkill?.score ?? null;
+                const combSkill   = (drvScore??0)+(progScore??0);
+                const myAvg       = parseFloat(stats.avgScore)||0;
+                const oppAvg      = parseFloat(stats.avgOpp)||0;
+                const barMax      = Math.max(myAvg, oppAvg, 1);
+                const pct         = v => Math.min(100, Math.round(v/barMax*100));
+
+                const qualMatches = matches.filter(m => m.scored && m.round===2);
+                const elimMatches = matches.filter(m => m.scored && m.round>2);
+
+                // Match pills
+                const makePill = m => {
+                    const myA = m.alliances.find(a=>a.teams.some(t=>t.team.name===team.number));
+                    const opA = m.alliances.find(a=>!a.teams.some(t=>t.team.name===team.number));
+                    if (!myA||!opA) return '';
+                    const won=myA.score>opA.score, tie=myA.score===opA.score;
+                    const cls=(won?'win':tie?'tie':'loss')+(m.round>2?' elim':'');
+                    const lbl=won?'W':tie?'T':'L';
+                    return `<span class="match-pill ${cls}" title="${m.name}: ${myA.score}–${opA.score}">${m.name.replace('Qualifier','Q').replace('Match','').trim()} ${lbl} ${myA.score}-${opA.score}</span>`;
+                };
+
+                // Trend sparkline
+                const trendMax = stats.scoreHistory.length ? Math.max(...stats.scoreHistory.map(h=>h.score)) : 1;
+                const trendBars = stats.scoreHistory.map(h => {
+                    const ht = Math.max(6, Math.round(h.score/trendMax*44));
+                    return `<div title="${h.match}: ${h.score}" style="width:14px;height:${ht}px;background:${h.won?'#10b981':'#ef4444'};border-radius:3px 3px 0 0;flex-shrink:0;"></div>`;
+                }).join('');
+
+                // Full match log
+                const logRows = [...qualMatches, ...elimMatches].map(m => {
+                    const myA = m.alliances.find(a=>a.teams.some(t=>t.team.name===team.number));
+                    const opA = m.alliances.find(a=>!a.teams.some(t=>t.team.name===team.number));
+                    if (!myA||!opA) return '';
+                    const won=myA.score>opA.score, tie=myA.score===opA.score;
+                    const rc=won?'#10b981':tie?'#94a3b8':'#ef4444';
+                    const rt=won?'W':tie?'T':'L';
+                    const partners = myA.teams.filter(t=>t.team.name!==team.number).map(t=>t.team.name).join(', ')||'—';
+                    const opps     = opA.teams.map(t=>t.team.name).join(', ');
+                    const rLabel   = m.round>2?`<span style="color:#f59e0b;">[${ROUND_NAMES[m.round]||'E'}] </span>`:'';
+                    return `<tr style="border-bottom:1px solid rgba(45,55,72,0.35);">
+                        <td style="padding:6px 4px;font-size:12px;color:#94a3b8;">${rLabel}${m.name}</td>
+                        <td style="padding:6px 4px;font-size:11px;color:#64748b;max-width:90px;">${partners}</td>
+                        <td style="padding:6px 4px;font-size:11px;color:#64748b;max-width:90px;">${opps}</td>
+                        <td style="padding:6px 4px;font-size:12px;text-align:center;white-space:nowrap;color:#e2e8f0;">${myA.score}–${opA.score}</td>
+                        <td style="padding:6px 4px;text-align:center;font-weight:800;color:${rc};">${rt}</td>
+                    </tr>`;
+                }).join('');
+
+                return `
+                <!-- HEADER -->
+                <div class="scout-modal-header">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+                        <div style="flex:1;min-width:160px;">
+                            <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;">
+                                <span style="font-size:30px;font-weight:800;color:#60a5fa;letter-spacing:-1px;">${team.number}</span>
+                                ${stats.reach.includes('Champion')?'<span style="font-size:22px;">🏆</span>':''}
+                            </div>
+                            <div style="font-size:15px;font-weight:600;color:#e2e8f0;margin-top:3px;">${team.team_name||'—'}</div>
+                            <div style="font-size:11px;color:#64748b;margin-top:2px;">${team.organization||''} ${team.location?.city?'· '+team.location.city:''}</div>
+                        </div>
+                        <div style="text-align:right;flex-shrink:0;">
+                            <div style="font-size:10px;color:#64748b;letter-spacing:1px;text-transform:uppercase;">Rank</div>
+                            <div style="font-size:36px;font-weight:800;color:#fbbf24;line-height:1;">${stats.rank==='—'?'—':'#'+stats.rank}</div>
+                            ${stats.totalTeams?`<div style="font-size:11px;color:#64748b;">of ${stats.totalTeams} teams</div>`:''}
+                            ${stats.percentile!==null?`<div style="font-size:12px;font-weight:700;color:${rankColor};margin-top:2px;">Top ${100-stats.percentile}%</div>`:''}
+                        </div>
+                    </div>
+                    <div style="margin-top:14px;padding:10px 16px;background:rgba(0,0,0,0.4);border-radius:10px;font-size:14px;font-weight:700;color:#10b981;text-align:center;letter-spacing:0.5px;">
+                        ${stats.reach}
+                    </div>
+                    <button onclick="app.closeScoutModal()"
+                        style="margin-top:12px;width:100%;padding:10px;background:rgba(220,38,38,0.15);border:1px solid rgba(220,38,38,0.4);border-radius:8px;color:#fca5a5;cursor:pointer;font-size:13px;font-weight:500;transition:background 0.2s;"
+                        onmouseover="this.style.background='rgba(220,38,38,0.3)'" onmouseout="this.style.background='rgba(220,38,38,0.15)'">
+                        ✕ Close
+                    </button>
+                </div>
+
+                <div class="scout-modal-body">
+
+                <!-- RECORD -->
+                <div class="stat-section">
+                    <div class="stat-section-title">📊 Tournament Record</div>
+                    <div class="stat-grid">
+                        <div class="stat-card" style="border-color:${wrColor}44;">
+                            <div class="val" style="font-size:26px;letter-spacing:-1px;color:${wrColor};">${stats.wins}–${stats.losses}–${stats.ties}</div>
+                            <div class="lbl">Wins – Losses – Ties</div>
+                        </div>
+                        <div class="stat-card" style="border-color:${wrColor}44;">
+                            <div class="val" style="font-size:26px;color:${wrColor};">${n?stats.winRate+'%':'—'}</div>
+                            <div class="lbl">Win Rate · ${n} qual match${n!==1?'es':''}</div>
+                        </div>
+                    </div>
+
+                    <!-- WP/AP/SP bars -->
+                    <div style="background:#0f172a;border-radius:10px;padding:14px;">
+                        <div class="mini-bar-row">
+                            <span class="mini-bar-label" style="color:#a78bfa;">WPs</span>
+                            <div class="mini-bar-track"><div class="mini-bar-fill" style="width:${stats.wp==='—'?0:Math.min(100,stats.wp/Math.max(n*2,1)*100)}%;background:linear-gradient(90deg,#7c3aed,#a78bfa);"></div></div>
+                            <span class="mini-bar-val" style="color:#a78bfa;">${stats.wp}</span>
+                        </div>
+                        <div class="mini-bar-row">
+                            <span class="mini-bar-label" style="color:#60a5fa;">APs</span>
+                            <div class="mini-bar-track"><div class="mini-bar-fill" style="width:${stats.ap==='—'?0:Math.min(100,stats.ap/Math.max(n*6,1)*100)}%;background:linear-gradient(90deg,#2563eb,#60a5fa);"></div></div>
+                            <span class="mini-bar-val" style="color:#60a5fa;">${stats.ap}</span>
+                        </div>
+                        <div class="mini-bar-row">
+                            <span class="mini-bar-label" style="color:#f59e0b;">SPs</span>
+                            <div class="mini-bar-track"><div class="mini-bar-fill" style="width:50%;background:linear-gradient(90deg,#d97706,#fbbf24);"></div></div>
+                            <span class="mini-bar-val" style="color:#f59e0b;">${stats.sp}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OFFENSE -->
+                <div class="stat-section">
+                    <div class="stat-section-title">⚔️ Offensive Performance</div>
+                    <div class="stat-grid-3">
+                        <div class="stat-card yellow">
+                            <div class="val">${n?stats.avgScore:'—'}</div>
+                            <div class="lbl">Avg Alliance Score</div>
+                        </div>
+                        <div class="stat-card green">
+                            <div class="val">${n?stats.highScore:'—'}</div>
+                            <div class="lbl">High Score</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="val" style="color:#94a3b8;">${n?stats.lowScore:'—'}</div>
+                            <div class="lbl">Low Score</div>
+                        </div>
+                    </div>
+                    <div class="mini-bar-row">
+                        <span class="mini-bar-label" style="color:#fbbf24;">Offense</span>
+                        <div class="mini-bar-track"><div class="mini-bar-fill" style="width:${pct(myAvg)}%;background:linear-gradient(90deg,#d97706,#fbbf24);"></div></div>
+                        <span class="mini-bar-val">${stats.avgScore}</span>
+                    </div>
+                    <div style="display:flex;gap:8px;margin-top:10px;">
+                        <div style="flex:1;background:#0f172a;border-radius:8px;padding:10px;text-align:center;border:1px solid rgba(239,68,68,0.3);">
+                            <div style="font-size:10px;color:#ef4444;font-weight:600;margin-bottom:4px;">🔴 AS RED</div>
+                            <div style="font-size:22px;font-weight:700;color:#e2e8f0;">${stats.redAvg}</div>
+                            <div style="font-size:10px;color:#64748b;">${stats.redGames} match${stats.redGames!==1?'es':''}</div>
+                        </div>
+                        <div style="flex:1;background:#0f172a;border-radius:8px;padding:10px;text-align:center;border:1px solid rgba(96,165,250,0.3);">
+                            <div style="font-size:10px;color:#60a5fa;font-weight:600;margin-bottom:4px;">🔵 AS BLUE</div>
+                            <div style="font-size:22px;font-weight:700;color:#e2e8f0;">${stats.blueAvg}</div>
+                            <div style="font-size:10px;color:#64748b;">${stats.blueGames} match${stats.blueGames!==1?'es':''}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DEFENSE -->
+                <div class="stat-section">
+                    <div class="stat-section-title">🛡️ Defensive Performance</div>
+                    <div class="stat-grid">
+                        <div class="stat-card red">
+                            <div class="val">${n?stats.avgOpp:'—'}</div>
+                            <div class="lbl">Avg Opp Score Allowed</div>
+                        </div>
+                        <div class="stat-card cyan">
+                            <div class="val" style="font-size:17px;">${n>1?'σ '+stats.stdDev:'—'}</div>
+                            <div class="lbl">Score Consistency</div>
+                        </div>
+                    </div>
+                    <div class="mini-bar-row">
+                        <span class="mini-bar-label" style="color:#ef4444;">Allowed</span>
+                        <div class="mini-bar-track"><div class="mini-bar-fill" style="width:${pct(oppAvg)}%;background:linear-gradient(90deg,#dc2626,#ef4444);"></div></div>
+                        <span class="mini-bar-val">${stats.avgOpp}</span>
+                    </div>
+                    <div style="display:flex;gap:8px;margin-top:10px;">
+                        <div style="flex:1;background:#0f172a;border-radius:8px;padding:10px;text-align:center;border:1px solid rgba(16,185,129,0.3);">
+                            <div style="font-size:10px;color:#10b981;font-weight:600;margin-bottom:4px;">AVG WIN MARGIN</div>
+                            <div style="font-size:22px;font-weight:700;color:#10b981;">+${stats.avgWinMargin}</div>
+                        </div>
+                        <div style="flex:1;background:#0f172a;border-radius:8px;padding:10px;text-align:center;border:1px solid rgba(239,68,68,0.3);">
+                            <div style="font-size:10px;color:#ef4444;font-weight:600;margin-bottom:4px;">AVG LOSS MARGIN</div>
+                            <div style="font-size:22px;font-weight:700;color:#ef4444;">-${stats.avgLossMargin}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SKILLS -->
+                <div class="stat-section">
+                    <div class="stat-section-title">🤖 Skills Scores</div>
+                    ${drvScore!==null||progScore!==null ? `
+                    <div class="stat-grid">
+                        <div class="stat-card purple">
+                            <div class="val">${drvScore??'—'}</div>
+                            <div class="lbl">🕹️ Driver Skills</div>
+                        </div>
+                        <div class="stat-card purple">
+                            <div class="val">${progScore??'—'}</div>
+                            <div class="lbl">💻 Programming Skills</div>
+                        </div>
+                    </div>
+                    <div style="background:#0f172a;border-radius:8px;padding:12px;text-align:center;">
+                        <div style="font-size:11px;color:#64748b;margin-bottom:4px;">COMBINED SKILLS SCORE</div>
+                        <div style="font-size:32px;font-weight:800;color:#a78bfa;">${combSkill}</div>
+                    </div>` : `<div style="padding:20px;text-align:center;color:#64748b;background:#0f172a;border-radius:8px;">
+                        <div style="font-size:24px;margin-bottom:6px;">—</div>No skills scores at this event</div>`}
+                </div>
+
+                <!-- ELIM RUN -->
+                ${elimMatches.length>0?`
+                <div class="stat-section">
+                    <div class="stat-section-title">⚡ Elimination Run</div>
+                    <div class="stat-grid">
+                        <div class="stat-card green">
+                            <div class="val">${stats.elimWins}–${stats.elimLosses}</div>
+                            <div class="lbl">Elim Record (W–L)</div>
+                        </div>
+                        <div class="stat-card yellow">
+                            <div class="val" style="font-size:13px;">${ROUND_NAMES[stats.maxElimRound]||'—'}</div>
+                            <div class="lbl">Furthest Round Reached</div>
+                        </div>
+                    </div>
+                    <div style="flex-wrap:wrap;display:flex;gap:2px;">${elimMatches.map(makePill).join('')}</div>
+                </div>`:''}
+
+                <!-- SCORE TREND -->
+                ${stats.scoreHistory.length>1?`
+                <div class="stat-section">
+                    <div class="stat-section-title">📈 Score Trend (Quals)</div>
+                    <div style="display:flex;align-items:flex-end;gap:4px;height:56px;padding:4px 0;overflow-x:auto;">${trendBars}</div>
+                    <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">${qualMatches.map(makePill).join('')}</div>
+                </div>`:''}
+
+                <!-- FULL MATCH LOG -->
+                <div class="stat-section">
+                    <div class="stat-section-title">📋 Full Match Log</div>
+                    <div style="overflow-x:auto;border-radius:8px;border:1px solid #1e293b;">
+                        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                            <thead style="background:#0f172a;">
+                                <tr>
+                                    <th style="padding:8px 6px;text-align:left;color:#64748b;font-weight:600;font-size:11px;">Match</th>
+                                    <th style="padding:8px 6px;text-align:left;color:#64748b;font-weight:600;font-size:11px;">Partner(s)</th>
+                                    <th style="padding:8px 6px;text-align:left;color:#64748b;font-weight:600;font-size:11px;">Opponents</th>
+                                    <th style="padding:8px 6px;text-align:center;color:#64748b;font-weight:600;font-size:11px;">Score</th>
+                                    <th style="padding:8px 6px;text-align:center;color:#64748b;font-weight:600;font-size:11px;">Result</th>
+                                </tr>
+                            </thead>
+                            <tbody>${logRows||'<tr><td colspan="5" style="padding:14px;text-align:center;color:#64748b;">No scored matches yet</td></tr>'}</tbody>
+                        </table>
+                    </div>
+                </div>
+
+                </div>`;
+            },
+        };
+
+        app.init();
+    </script>
+</body>
+</html>
